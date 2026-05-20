@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT Intelligent System V3 - Full PDF Suite</title>
+    <title>CBT Intelligent System V3 - Client Side</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -21,7 +21,7 @@
         .soal-frame-area { flex: 3.5; background: #fff; position: relative; }
         iframe { width: 100%; height: 100%; border: none; }
         .sidebar { flex: 1; background: #f1f5f9; padding: 20px; box-sizing: border-box; border-left: 1px solid #e2e8f0; }
-        .admin-main { padding: 25px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; max-width: 1600px; margin: 0 auto; }
+        .admin-main { padding: 25px; display: grid; grid-template-columns: 1fr 1.6fr; gap: 25px; max-width: 1600px; margin: 0 auto; }
         .admin-col { background: white; padding: 22px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); height: fit-content; border: 1px solid #e2e8f0; }
         .btn { padding: 11px 16px; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: white; display: inline-block; margin-right: 5px; text-decoration: none; text-align: center; }
         .btn-block { width: 100%; margin-top: 5px; margin-bottom: 5px; box-sizing: border-box; }
@@ -36,11 +36,11 @@
         .tag { padding: 3px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; color: white; display: inline-block; }
         .tag-room { background: #0ea5e9; }
         
-        /* PREVIEW LAYOUT ENGINE UNTUK PDF A4 */
+        .upload-zone { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 6px; background: #f8fafc; cursor: pointer; margin-bottom: 10px; }
+        .upload-zone:hover { background: #f1f5f9; border-color: var(--secondary); }
+
         .pdf-preview-container { background: #525659; padding: 30px 15px; min-height: 100vh; }
         .pdf-page-sheet { background: white; width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto 15mm auto; box-shadow: 0 0 15px rgba(0,0,0,0.3); box-sizing: border-box; color: #000; }
-        
-        /* GAYA BERITA ACARA */
         .ba-title { text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 25px; line-height: 1.4; border-bottom: 3px double #000; padding-bottom: 10px; }
         .ba-meta-table { width: 100%; margin-bottom: 20px; font-size: 13px; }
         .ba-meta-table td { border: none; padding: 4px 0; }
@@ -50,7 +50,6 @@
         .ba-ttd-space { margin-top: 40px; display: table; width: 100%; }
         .ba-ttd-cell { display: table-cell; width: 50%; text-align: center; font-size: 13px; }
 
-        /* GAYA KARTU PESERTA CUSTOM */
         .grid-kartu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .kartu-box { border: 2px solid #000; padding: 15px; border-radius: 8px; background: #fff; position: relative; box-sizing: border-box; page-break-inside: avoid; }
         .kartu-header { border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 12px; line-height: 1.3; }
@@ -60,7 +59,7 @@
 </head>
 <body>
 
-    <div id="view-login" class="login-card no-print">
+    <div id="view-login" class="login-card">
         <h2 style="color: var(--primary); margin-top:0; text-align:center; font-weight: 800;">CBT SMK BHAKTI PRAJA 2 BATANG</h2>
         <div class="form-group">
             <label>Otoritas Akses</label>
@@ -84,10 +83,10 @@
             <label id="token-label">Token Jalur Sesi Ujian</label>
             <input type="password" id="passOrToken" placeholder="Masukkan Sandi Keamanan">
         </div>
-        <button class="btn btn-primary btn-block" onclick="prosesLoginSistem()">LOGIN</button>
+        <button class="btn btn-primary btn-block" id="btn-login-submit" onclick="prosesLoginSistem()">LOGIN</button>
     </div>
 
-    <div id="view-siswa" class="hidden no-print">
+    <div id="view-siswa" class="hidden">
         <header>
             <div>[SEKTOR: <span id="s-ruang" style="color: var(--accent);">--</span>] MAPEL: <span id="s-mapel">--</span></div>
             <div style="color: var(--danger); font-weight: 800;" id="p-count">Pelanggaran Layar: 0/3</div>
@@ -106,14 +105,23 @@
         </div>
     </div>
 
-    <div id="view-admin" class="hidden no-print">
-        <header style="background: #0f172a;">
+    <div id="view-admin" class="hidden">
+        <header>
             <div>CONTROL PANEL PROKTOR - PDF EXPORTER SUITE</div>
             <button class="btn btn-danger" onclick="window.location.reload()">LOGOUT</button>
         </header>
         
         <div class="admin-main">
             <div class="admin-col">
+                <h3 style="margin-top:0; color: var(--primary);">📅 Atur Jadwal Massal (.xlsx)</h3>
+                <p style="font-size: 11px; color:#64748b; margin-top:-8px;">Urutan kolom Excel: ID, Mapel, Kelas, Ruang, JamMulai, JamSelesai, LinkForm, Token</p>
+                <div class="upload-zone" onclick="document.getElementById('excel-file').click()">
+                    <span>📁 Klik / Taruh File Excel Jadwal</span>
+                    <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls" onchange="prosesExcelJadwal(event)">
+                </div>
+                
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
+
                 <h3 style="margin-top:0; color: var(--primary);">⚙️ Kustomisasi Kartu Peserta</h3>
                 <div class="form-group">
                     <label>Nama Instansi / Sekolah</label>
@@ -129,7 +137,7 @@
                 </div>
                 <button class="btn btn-primary btn-block" onclick="generatePdfKartuMassal()">🖨️ CETAK KARTU MASSAL (PDF)</button>
                 
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
                 
                 <h3 style="color: var(--primary);">📄 Dokumen Berita Acara (BA)</h3>
                 <div class="form-group">
@@ -140,27 +148,21 @@
                     <button class="btn btn-success btn-block" onclick="generateBeritaAcara('sederhana')">BA Sederhana (PDF)</button>
                     <button class="btn btn-accent btn-block" onclick="generateBeritaAcara('lengkap')">BA Lengkap (PDF)</button>
                 </div>
-                
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-                <h3 style="color: var(--primary);">+ Tambah Sesi Ujian</h3>
-                <div class="form-group"><label>ID Ujian</label><input type="text" id="u-id" placeholder="SESI-BI-XI"></div>
-                <div class="form-group"><label>Mata Pelajaran</label><input type="text" id="u-mapel"></div>
-                <div class="form-group"><label>Kelas</label><input type="text" id="u-kelas"></div>
-                <div class="form-group"><label>Ruang Asal</label><input type="text" id="u-ruang" placeholder="Ruang 01"></div>
-                <div style="display:flex; gap:10px;" class="form-group">
-                    <input type="text" id="u-mulai" placeholder="07:30">
-                    <input type="text" id="u-selesai" placeholder="09:30">
-                </div>
-                <div class="form-group"><label>Link Form</label><input type="text" id="u-link"></div>
-                <div class="form-group"><label>Token</label><input type="text" id="u-token" style="text-transform: uppercase;"></div>
-                <button class="btn btn-primary btn-block" onclick="simpanJadwalBaru()">PUBLIKASIKAN SESI</button>
             </div>
 
             <div class="admin-col">
-                <h3 style="margin-top:0; color: var(--primary);">Live Tracking Log Aktivitas Peserta</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin:0; color: var(--primary);">Live Tracking Log Aktivitas Peserta</h3>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Filter Ruang Ujian:</label>
+                        <select id="filter-ruang" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;" onchange="renderTabelSiswa()">
+                            <option value="SEMUA">-- Tampilkan Semua Ruang --</option>
+                        </select>
+                    </div>
+                </div>
                 <table>
                     <thead>
-                        <th>No Peserta</th><th>Nama Siswa</th><th>Lokasi Real-Time</th><th>Kondisi Sesi</th><th>Pelanggaran</th><th>Aksi</th>
+                        <tr><th>No Peserta</th><th>Nama Siswa</th><th>Lokasi Real-Time</th><th>Kondisi Sesi</th><th>Pelanggaran</th><th>Aksi</th></tr>
                     </thead>
                     <tbody id="siswa-table-body"></tbody>
                 </table>
@@ -169,25 +171,26 @@
     </div>
 
     <div id="div-render-pdf" class="hidden pdf-preview-container">
-        <div class="no-print" style="max-width:210mm; margin:0 auto 15px auto; display:flex; justify-content:space-between; background:#fff; padding:12px; border-radius:8px;">
+        <div style="max-width:210mm; margin:0 auto 15px auto; display:flex; justify-content:space-between; background:#fff; padding:12px; border-radius:8px;">
             <div style="font-weight:bold; padding-top:6px; color:#1e293b;">📄 Pratinjau Dokumen Siap Cetak</div>
             <div>
                 <button class="btn btn-success" onclick="eksporPdfDirect()">💾 DOWNLOAD FILE PDF</button>
                 <button class="btn btn-danger" onclick="tutupPreviewPdf()">❌ KEMBALI KE PANEL</button>
             </div>
         </div>
-        <div id="pdf-content-wrapper">
-            </div>
+        <div id="pdf-content-wrapper"></div>
     </div>
 
-    <div id="lock-screen" class="hidden no-print">
+    <div id="lock-screen" class="hidden">
         <h1 style="font-size: 40px; color: var(--danger); font-weight: 900;">AKSES LAYAR DIKUNCI PROKTOR</h1>
         <p>Anda terdeteksi berpindah tab browser ujian sebanyak 3 kali berturut-turut.</p>
         <p>Silakan hubungi proktor di depan meja pengawas untuk membuka kembali akses ujian Anda.</p>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycby7aQiIRJnB6goI-DvAwBJt2F6Gf1JLFk9Ylye691EhdkNVHWKOP16KZuqA7ChfhBbW/exec"; // GANTI DENGAN URL WEB APP ANDA
+        // MASUKKAN URL WEB APP GOOGLE SCRIPT (DEPLOYMENT TERBARU) ANDA DI SINI
+        const API_URL = "https://script.google.com/macros/s/AKfycbyp6CO49hZ3z4-sp4ZdDD2CcI9GCgGNZs_jGRHZHUzMeeaTC1zklLw10pDTEmpeuz-D/exec"; 
+        
         let userSiswaAktif = "";
         let pilihanHpAktif = "YA";
         let jumlahPelanggaran = 0;
@@ -204,19 +207,33 @@
             const role = document.getElementById('role').value;
             const user = document.getElementById('username').value.trim();
             const passOrToken = document.getElementById('passOrToken').value.trim();
+            const btnLogin = document.getElementById('btn-login-submit');
             
+            if(!user || !passOrToken) return alert("Harap isi seluruh field data login!");
+
             const hpOpts = document.getElementsByName('hp_opt');
             for(let i=0; i<hpOpts.length; i++) { if(hpOpts[i].checked) { pilihanHpAktif = hpOpts[i].value; break; } }
 
-            fetch(`${API_URL}?action=loginSistem&role=${role}&username=${user}&passOrToken=${passOrToken}&punyaHp=${pilihanHpAktif}`)
+            btnLogin.innerText = "MEMPROSES AUTENTIKASI...";
+            btnLogin.disabled = true;
+
+            fetch(`${API_URL}?action=loginSistem&role=${role}&username=${encodeURIComponent(user)}&passOrToken=${encodeURIComponent(passOrToken)}&punyaHp=${pilihanHpAktif}`, { method: "GET", mode: "cors" })
             .then(res => res.json())
             .then(data => {
-                if (data.status === "GAGAL") return alert("ID Akses atau Kredensial Salah!");
-                if (data.status === "SALAH_TOKEN") return alert("Token Sesi Tidak Valid!");
-                if (data.status === "DIBLOKIR") return alert("Akun Anda Ditangguhkan!");
-                if (data.status === "BELUM_MULAI") return alert(`Sesi belum aktif. Sesi dibuka: ${data.info}`);
-                if (data.status === "SUDAH_SELESAI") return alert("Sesi pengerjaan mapel ini telah kedaluwarsa!");
-                if (data.status === "TERLAMBAT_HANGUS") return alert(`Ditolak! Anda terlambat ${data.info} menit.`);
+                btnLogin.innerText = "LOGIN"; btnLogin.disabled = false;
+
+                // --- SISTEM VALIDASI RESPONS SERVER BARU ---
+                if (data.status === "GAGAL") return alert("Nomor Peserta atau Kredensial Salah!");
+                if (data.status === "SALAH_TOKEN") return alert("Token Sesi Ujian Tidak Valid / Salah!");
+                if (data.status === "DIBLOKIR") return alert("Akun Anda Ditangguhkan oleh Proktor!");
+                if (data.status === "BELUM_MULAI") return alert(`Ujian belum dibuka. Jam masuk Sesi: ${data.info}`);
+                
+                // Blokir Login Jika Waktu Selesai
+                if (data.status === "SUDAH_SELESAI") {
+                    return alert("Maaf, login ditolak. Waktu untuk token sesi ujian ini telah habis!");
+                }
+                
+                if (data.status === "TERLAMBAT_HANGUS") return alert(`Batas toleransi terlambat habis (Anda telat ${data.info} menit).`);
 
                 if (data.status === "SUKSES_ADMIN") {
                     document.getElementById('view-login').classList.add('hidden');
@@ -230,21 +247,112 @@
                         document.getElementById('notif-menit-telat').classList.remove('hidden');
                         document.getElementById('menit-terbuang').innerText = data.telatMenit;
                     }
-                    
-                    fetch(`${API_URL}?action=getSetupSiswa&username=${user}&punyaHp=${pilihanHpAktif}`)
+                    fetch(`${API_URL}?action=getSetupSiswa&username=${encodeURIComponent(user)}&punyaHp=${pilihanHpAktif}`, { method: "GET", mode: "cors" })
                     .then(res => res.json())
                     .then(setup => {
                         document.getElementById('s-nama').innerText = data.nama;
                         document.getElementById('s-mapel').innerText = setup.mapel;
                         document.getElementById('s-ruang').innerText = data.ruangMengerjakan; 
                         document.getElementById('gform-iframe').src = setup.link;
-                        
                         document.getElementById('view-login').classList.add('hidden');
                         document.getElementById('view-siswa').classList.remove('hidden');
                         aktifkanAntiCheating();
                     });
                 }
+            }).catch(() => { btnLogin.innerText = "LOGIN"; btnLogin.disabled = false; alert("Gagal terhubung ke Server Cloud."); });
+        }
+
+        function prosesExcelJadwal(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                let dataJadwalMassal = [];
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0]) { 
+                        dataJadwalMassal.push({
+                            id: rows[i][0].toString().trim(),
+                            mapel: rows[i][1]?.toString().trim() || "",
+                            kelas: rows[i][2]?.toString().trim() || "",
+                            ruang: rows[i][3]?.toString().trim() || "Ruang Global",
+                            mulai: rows[i][4]?.toString().trim() || "07:30",
+                            selesai: rows[i][5]?.toString().trim() || "09:00",
+                            link: rows[i][6]?.toString().trim() || "",
+                            token: rows[i][7]?.toString().trim() || "TOKEN1"
+                        });
+                    }
+                }
+                
+                if (dataJadwalMassal.length === 0) return alert("File Excel kosong!");
+                
+                if(confirm(`Apakah Anda yakin ingin mengimpor ${dataJadwalMassal.length} sesi ujian sekaligus?`)) {
+                    fetch(API_URL, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "addUjianMassal", dataUjian: dataJadwalMassal })
+                    })
+                    .then(res => res.json())
+                    .then(resData => {
+                        alert(resData.msg || "Impor Selesai!");
+                        muatDataControlRoom();
+                    }).catch(err => alert("Gagal kirim data: " + err.message));
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function muatDataControlRoom() {
+            fetch(API_URL + "?action=getMasterData", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(data => {
+                cacheMasterData = data;
+                updateDropdownRuang(data.siswa);
+                renderTabelSiswa();
             });
+        }
+
+        function updateDropdownRuang(listSiswa) {
+            const dropdown = document.getElementById('filter-ruang');
+            const nilaiSekarang = dropdown.value;
+            
+            let ruangSet = new Set();
+            listSiswa.forEach(s => { if(s.ruang) ruangSet.add(s.ruang.trim()); });
+            
+            let htmlOptions = '<option value="SEMUA">-- Tampilkan Semua Ruang --</option>';
+            ruangSet.forEach(ruang => {
+                htmlOptions += `<option value="${ruang}">${ruang}</option>`;
+            });
+            dropdown.innerHTML = htmlOptions;
+            dropdown.value = nilaiSekarang; 
+        }
+
+        function renderTabelSiswa() {
+            if(!cacheMasterData.siswa) return;
+            const filterDipilih = document.getElementById('filter-ruang').value;
+            let htmlSiswa = "";
+            
+            cacheMasterData.siswa.forEach(s => {
+                if (filterDipilih !== "SEMUA" && s.ruang.trim() !== filterDipilih) return;
+                
+                let stColor = s.status === "DIBLOKIR" ? "#ef4444" : "#22c55e";
+                let actionBtn = s.status === "DIBLOKIR" ? `<button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="eksekusiBukaBlokir('${s.no}')">Buka</button>` : `<span style="color:#94a3b8">Aktif</span>`;
+                
+                htmlSiswa += `<tr>
+                    <td><b>${s.no}</b></td>
+                    <td>${s.nama}</td>
+                    <td><span class="tag tag-room">${s.ruang}</span></td>
+                    <td style="color:${stColor}; font-weight:bold;">${s.status}</td>
+                    <td style="color:var(--danger); font-weight:bold;">${s.salah} / 3</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            });
+            document.getElementById('siswa-table-body').innerHTML = htmlSiswa;
         }
 
         function aktifkanAntiCheating() {
@@ -252,44 +360,19 @@
             window.onblur = function() {
                 jumlahPelanggaran++;
                 document.getElementById('p-count').innerText = `Pelanggaran Layar: ${jumlahPelanggaran}/3`;
-                fetch(`${API_URL}?action=updatePelanggaran&username=${userSiswaAktif}&jumlah=${jumlahPelanggaran}`);
+                fetch(`${API_URL}?action=updatePelanggaran&username=${encodeURIComponent(userSiswaAktif)}&jumlah=${jumlahPelanggaran}`, { method: "GET", mode: "cors" });
                 if (jumlahPelanggaran >= 3) {
                     document.getElementById('lock-screen').classList.remove('hidden');
                     if(document.exitFullscreen) document.exitFullscreen().catch(() => {});
                 } else {
-                    alert(`PERINGATAN LAYAR!\nSisa toleransi perpindahan aplikasi Anda: ${3 - jumlahPelanggaran} kali.`);
+                    alert(`Sisa toleransi berpindah jendela: ${3 - jumlahPelanggaran} kali.`);
                 }
             };
         }
 
-        function muatDataControlRoom() {
-            fetch(API_URL + "?action=getMasterData")
-            .then(res => res.json())
-            .then(data => {
-                cacheMasterData = data;
-                let htmlSiswa = "";
-                data.siswa.forEach(s => {
-                    let stColor = s.status === "DIBLOKIR" ? "#ef4444" : "#22c55e";
-                    let actionBtn = s.status === "DIBLOKIR" ? `<button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="eksekusiBukaBlokir('${s.no}')">Buka</button>` : `<span style="color:#94a3b8">Aktif</span>`;
-                    
-                    htmlSiswa += `<tr>
-                        <td><b>${s.no}</b></td>
-                        <td>${s.nama}</td>
-                        <td><span class="tag tag-room">${s.ruang}</span></td>
-                        <td style="color:${stColor}; font-weight:bold;">${s.status}</td>
-                        <td style="color:var(--danger); font-weight:bold;">${s.salah} / 3</td>
-                        <td>${actionBtn}</td>
-                    </tr>`;
-                });
-                document.getElementById('siswa-table-body').innerHTML = htmlSiswa;
-            });
-        }
-
-        // ================== LOGIKA GENERATE KARTU MASSAL CUSTOM PDF ==================
         function generatePdfKartuMassal() {
-            if(!cacheMasterData.siswa) return alert("Data antrean siswa belum termuat sempurna!");
-            namaFileUnduhan = "Kartu_Peserta_Massal_CBT";
-            
+            if(!cacheMasterData.siswa) return alert("Data siswa belum siap!");
+            namaFileUnduhan = "Kartu_Peserta_Massal";
             const nSekolah = document.getElementById('cfg-sekolah').value.toUpperCase();
             const subTitle = document.getElementById('cfg-sub').value.toUpperCase();
             const footText = document.getElementById('cfg-footer').value;
@@ -301,7 +384,6 @@
             let counter = 0;
 
             cacheMasterData.siswa.forEach((s, idx) => {
-                // Batasi isi kartu maksimal 8 item per halaman A4 agar presisi tidak luber
                 if (counter > 0 && counter % 8 === 0) {
                     sheetsHtml += '</div></div><div class="pdf-page-sheet"><div class="grid-kartu">';
                 }
@@ -317,16 +399,13 @@
                 </div>`;
                 counter++;
             });
-
             sheetsHtml += '</div></div>';
             document.getElementById('pdf-content-wrapper').innerHTML = sheetsHtml;
         }
 
-        // ================== LOGIKA GENERATE BERITA ACARA PDF (SEDERHANA & LENGKAP) ==================
         function generateBeritaAcara(tipe) {
-            if(!cacheMasterData.siswa) return alert("Log realisasi siswa belum siap!");
-            namaFileUnduhan = `Berita_Acara_${tipe.toUpperCase()}_CBT`;
-            
+            if(!cacheMasterData.siswa) return alert("Log data siswa kosong!");
+            namaFileUnduhan = `Berita_Acara_${tipe.toUpperCase()}`;
             const proktorName = document.getElementById('cfg-proktor').value;
             const tgl = new Date();
             const strTgl = tgl.getDate() + "/" + (tgl.getMonth()+1) + "/" + tgl.getFullYear();
@@ -337,104 +416,37 @@
             let tableRows = "";
             cacheMasterData.siswa.forEach((s, idx) => {
                 if (tipe === 'sederhana') {
-                    tableRows += `<tr>
-                        <td style="text-align:center;">${idx+1}</td>
-                        <td><b>${s.no}</b></td>
-                        <td>${s.nama}</td>
-                        <td>${s.ruang}</td>
-                        <td style="color: green; font-weight:bold;">Hadir</td>
-                    </tr>`;
+                    tableRows += `<tr><td style="text-align:center;">${idx+1}</td><td><b>${s.no}</b></td><td>${s.nama}</td><td>${s.ruang}</td><td style="color: green; font-weight:bold;">Hadir</td></tr>`;
                 } else {
-                    let ket = s.salah >= 3 ? "TERKUNCI BLOKIR" : "NORMAL / AMAN";
-                    tableRows += `<tr>
-                        <td style="text-align:center;">${idx+1}</td>
-                        <td><b>${s.no}</b></td>
-                        <td>${s.nama}</td>
-                        <td>${s.ruang}</td>
-                        <td>${s.status}</td>
-                        <td style="text-align:center; color:red; font-weight:bold;">${s.salah} Kali Out</td>
-                        <td>${ket}</td>
-                    </tr>`;
+                    tableRows += `<tr><td style="text-align:center;">${idx+1}</td><td><b>${s.no}</b></td><td>${s.nama}</td><td>${s.ruang}</td><td>${s.status}</td><td style="text-align:center; color:red; font-weight:bold;">${s.salah} Kali Out</td><td>${s.status === 'DIBLOKIR' ? 'TERKUNCI':'AMAN'}</td></tr>`;
                 }
             });
 
             let thHeader = tipe === 'sederhana' ? 
                 `<th>No</th><th>No Peserta</th><th>Nama Lengkap</th><th>Sektor Aktual</th><th>Kehadiran</th>` :
-                `<th>No</th><th>No Peserta</th><th>Nama Lengkap</th><th>Sektor Aktual</th><th>Status Akun</th><th>Log Out Tab</th><th>Keterangan Sistem</th>`;
+                `<th>No</th><th>No Peserta</th><th>Nama Lengkap</th><th>Sektor Aktual</th><th>Status Akun</th><th>Log Out Tab</th><th>Keterangan</th>`;
 
-            let catatanIntegritas = tipe === 'lengkap' ? `
-                <p style="font-size:12px; line-height:1.4;"><b>CATATAN INTEGRITAS MEKANISME SYSTEM LOCK:</b><br>
-                Sistem melakukan pengawasan background window secara real-time. Peserta dengan status 'TERKUNCI BLOKIR' wajib melakukan klarifikasi fisik kepada Pengawas demi memulihkan hak pengerjaan token sesi.</p>
-            ` : '';
-
-            let templateBa = `
-            <div class="pdf-page-sheet">
-                <div class="ba-title">
-                    BERITA ACARA PELAKSANAAN UJIAN CBT DIGITAL<br>
-                    <span style="font-size:12px; font-weight:normal; text-transform:none;">Kategori Laporan: Rekapitulasi Dokumen ${tipe.toUpperCase()}</span>
-                </div>
+            let templateBa = `<div class="pdf-page-sheet">
+                <div class="ba-title">BERITA ACARA PELAKSANAAN UJIAN CBT DIGITAL<br><span style="font-size:12px; font-weight:normal; text-transform:none;">Kategori Laporan: ${tipe.toUpperCase()}</span></div>
                 <table class="ba-meta-table">
                     <tr><td style="width:180px;">Hari / Tanggal Berjalan</td><td>: ${strTgl}</td></tr>
-                    <tr><td>Sinkronisasi Waktu</td><td>: Server WIB Jakarta (Locked GMT+7)</td></tr>
-                    <tr><td>Waktu Unduh Dokumen</td><td>: ${tgl.getHours()}:${tgl.getMinutes()} WIB</td></tr>
+                    <tr><td>Sinkronisasi Waktu</td><td>: Server WIB Jakarta</td></tr>
                     <tr><td>Penanggung Jawab Proktor</td><td>: ${proktorName}</td></tr>
                 </table>
-                
-                <p style="font-size:13px;">Telah dilaksanakan evaluasi berbasis digital menggunakan Gatekeeper anti-cheat system. Berikut merupakan riwayat kehadiran aktual peserta di dalam server:</p>
-                
-                <table class="ba-siswa-table">
-                    <thead><tr>${thHeader}</tr></thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-                
-                <br>
-                ${catatanIntegritas}
-                
+                <table class="ba-siswa-table"><thead><tr>${thHeader}</tr></thead><tbody>${tableRows}</tbody></table>
                 <div class="ba-ttd-space">
                     <div class="ba-ttd-cell">Mengetahui,<br>Pengawas Ruangan<br><br><br><br>( ____________________ )</div>
                     <div class="ba-ttd-cell">Dibuat di: Sektor Pusat<br>Proktor Utama / IT Admin<br><br><br><br><b>( ${proktorName} )</b></div>
                 </div>
             </div>`;
-
             document.getElementById('pdf-content-wrapper').innerHTML = templateBa;
         }
 
-        // ENGINE DOWNLOAD LANGSUNG MENJADI FILE PDF
         function eksporPdfDirect() {
-            const element = document.getElementById('pdf-content-wrapper');
-            const opt = {
-                margin:       0,
-                filename:     `${namaFileUnduhan}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set({ margin: 0, filename: `${namaFileUnduhan}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('pdf-content-wrapper')).save();
         }
-
-        function tutupPreviewPdf() {
-            document.getElementById('div-render-pdf').classList.add('hidden');
-            document.getElementById('view-admin').classList.remove('hidden');
-        }
-
-        function simpanJadwalBaru() {
-            const id = encodeURIComponent(document.getElementById('u-id').value);
-            const mp = encodeURIComponent(document.getElementById('u-mapel').value);
-            const kl = encodeURIComponent(document.getElementById('u-kelas').value);
-            const rg = encodeURIComponent(document.getElementById('u-ruang').value);
-            const ml = encodeURIComponent(document.getElementById('u-mulai').value);
-            const sl = encodeURIComponent(document.getElementById('u-selesai').value);
-            const lk = encodeURIComponent(document.getElementById('u-link').value);
-            const tk = encodeURIComponent(document.getElementById('u-token').value.toUpperCase());
-
-            fetch(`${API_URL}?action=addUjian&id=${id}&mapel=${mp}&kelas=${kl}&ruang=${rg}&mulai=${ml}&selesai=${sl}&link=${lk}&token=${tk}`)
-            .then(() => { alert("Sesi Ujian Berhasil Didaftarkan!"); muatDataControlRoom(); });
-        }
-
-        function eksekusiBukaBlokir(noPeserta) {
-            fetch(`${API_URL}?action=bukaBlokir&username=${noPeserta}`)
-            .then(() => { alert(`Kunci Layar Siswa ${noPeserta} Dibuka!`); muatDataControlRoom(); });
-        }
+        function tutupPreviewPdf() { document.getElementById('div-render-pdf').classList.add('hidden'); document.getElementById('view-admin').classList.remove('hidden'); }
+        function eksekusiBukaBlokir(noPeserta) { fetch(`${API_URL}?action=bukaBlokir&username=${encodeURIComponent(noPeserta)}`, { method: "GET", mode: "cors" }).then(() => { alert(`Siswa ${noPeserta} Aktif Kembali!`); muatDataControlRoom(); }); }
     </script>
 </body>
 </html>
