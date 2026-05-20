@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT Intelligent System V3 - Client Side</title>
+    <title>CBT SMK Bhakti Praja 2 Batang</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -21,9 +21,9 @@
         .soal-frame-area { flex: 3.5; background: #fff; position: relative; }
         iframe { width: 100%; height: 100%; border: none; }
         .sidebar { flex: 1; background: #f1f5f9; padding: 20px; box-sizing: border-box; border-left: 1px solid #e2e8f0; }
-        .admin-main { padding: 25px; display: grid; grid-template-columns: 1fr 1.6fr; gap: 25px; max-width: 1600px; margin: 0 auto; }
+        .admin-main { padding: 25px; display: grid; grid-template-columns: 1.2fr 1.4fr; gap: 25px; max-width: 1700px; margin: 0 auto; }
         .admin-col { background: white; padding: 22px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); height: fit-content; border: 1px solid #e2e8f0; }
-        .btn { padding: 11px 16px; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: white; display: inline-block; margin-right: 5px; text-decoration: none; text-align: center; }
+        .btn { padding: 11px 16px; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: white; display: inline-block; margin-right: 5px; text-decoration: none; text-align: center; font-size: 13px; }
         .btn-block { width: 100%; margin-top: 5px; margin-bottom: 5px; box-sizing: border-box; }
         .btn-primary { background: var(--secondary); }
         .btn-success { background: var(--success); }
@@ -36,8 +36,14 @@
         .tag { padding: 3px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; color: white; display: inline-block; }
         .tag-room { background: #0ea5e9; }
         
-        .upload-zone { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 6px; background: #f8fafc; cursor: pointer; margin-bottom: 10px; }
+        .upload-zone { border: 2px dashed #cbd5e1; padding: 12px; text-align: center; border-radius: 6px; background: #f8fafc; cursor: pointer; margin-bottom: 10px; font-size: 13px; }
         .upload-zone:hover { background: #f1f5f9; border-color: var(--secondary); }
+
+        /* Style Baru untuk Form Dinamis Banyak Mapel */
+        .mapel-row-item { background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; position: relative; }
+        .mapel-grid-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+        .mapel-grid-inputs input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
+        .btn-remove-row { position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer; }
 
         .pdf-preview-container { background: #525659; padding: 30px 15px; min-height: 100vh; }
         .pdf-page-sheet { background: white; width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto 15mm auto; box-shadow: 0 0 15px rgba(0,0,0,0.3); box-sizing: border-box; color: #000; }
@@ -107,46 +113,55 @@
 
     <div id="view-admin" class="hidden">
         <header>
-            <div>CONTROL PANEL PROKTOR - PDF EXPORTER SUITE</div>
+            <div>CONTROL PANEL PROKTOR - FULL SUITE EDITION</div>
             <button class="btn btn-danger" onclick="window.location.reload()">LOGOUT</button>
         </header>
         
         <div class="admin-main">
             <div class="admin-col">
-                <h3 style="margin-top:0; color: var(--primary);">📅 Atur Jadwal Massal (.xlsx)</h3>
-                <p style="font-size: 11px; color:#64748b; margin-top:-8px;">Urutan kolom Excel: ID, Mapel, Kelas, Ruang, JamMulai, JamSelesai, LinkForm, Token</p>
+                <h3 style="margin-top:0; color: var(--primary);">🛠️ Atur Banyak Jadwal Mapel Manual</h3>
+                <div id="container-multi-mapel">
+                    <div class="mapel-row-item">
+                        <div class="mapel-grid-inputs">
+                            <input type="text" placeholder="ID Sesi (Contoh: M-01)" class="m-id">
+                            <input type="text" placeholder="Nama Mata Pelajaran" class="m-nama">
+                            <input type="text" placeholder="Kelas (Contoh: XII-RPL)" class="m-kelas">
+                            <input type="text" placeholder="Ruang (Contoh: Lab 2)" class="m-ruang">
+                            <input type="text" placeholder="Jam Mulai (07:30)" class="m-mulai">
+                            <input type="text" placeholder="Jam Selesai (09:30)" class="m-selesai">
+                            <input type="text" placeholder="Token Akses Sesi" class="m-token">
+                            <input type="text" placeholder="URL Google Form Soal" class="m-link">
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <button class="btn btn-accent" style="flex: 1;" onclick="tambahBarisMapelForm()">➕ Tambah Form Mapel</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="simpanMultiJadwalManual()">💾 Simpan Semua Mapel</button>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
+
+                <h3 style="color: var(--primary);">📁 Impor Jalur Alternatif (.xlsx)</h3>
                 <div class="upload-zone" onclick="document.getElementById('excel-file').click()">
-                    <span>📁 Klik / Taruh File Excel Jadwal</span>
+                    <span>📂 Klik untuk Unggah Excel Jadwal Massal</span>
                     <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls" onchange="prosesExcelJadwal(event)">
                 </div>
                 
                 <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
 
-                <h3 style="margin-top:0; color: var(--primary);">⚙️ Kustomisasi Kartu Peserta</h3>
+                <h3 style="color: var(--primary);">⚙️ Kustomisasi Kartu & Berita Acara</h3>
                 <div class="form-group">
                     <label>Nama Instansi / Sekolah</label>
                     <input type="text" id="cfg-sekolah" value="SMK BHAKTI PRAJA 2 BATANG">
                 </div>
                 <div class="form-group">
-                    <label>Sub-Header Kartu</label>
-                    <input type="text" id="cfg-sub" value="ASESMEN BERBASIS KOMPUTER & HP">
-                </div>
-                <div class="form-group">
-                    <label>Catatan Kaki Kartu (Kecil)</label>
-                    <input type="text" id="cfg-footer" value="*Harap simpan kartu ini jangan sampai hilang.">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="generatePdfKartuMassal()">🖨️ CETAK KARTU MASSAL (PDF)</button>
-                
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
-                
-                <h3 style="color: var(--primary);">📄 Dokumen Berita Acara (BA)</h3>
-                <div class="form-group">
                     <label>Nama Pengawas / Proktor</label>
                     <input type="text" id="cfg-proktor" value="Budi Setiadi, S.Kom.">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button class="btn btn-success btn-block" onclick="generateBeritaAcara('sederhana')">BA Sederhana (PDF)</button>
-                    <button class="btn btn-accent btn-block" onclick="generateBeritaAcara('lengkap')">BA Lengkap (PDF)</button>
+                <button class="btn btn-success btn-block" style="margin-bottom: 8px;" onclick="generatePdfKartuMassal()">🖨️ CETAK KARTU MASSAL (PDF)</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn btn-primary btn-block" style="background:#475569;" onclick="generateBeritaAcara('sederhana')">BA Sederhana</button>
+                    <button class="btn btn-primary btn-block" style="background:#1e293b;" onclick="generateBeritaAcara('lengkap')">BA Lengkap</button>
                 </div>
             </div>
 
@@ -154,9 +169,9 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h3 style="margin:0; color: var(--primary);">Live Tracking Log Aktivitas Peserta</h3>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Filter Ruang Ujian:</label>
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Filter Ruang:</label>
                         <select id="filter-ruang" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;" onchange="renderTabelSiswa()">
-                            <option value="SEMUA">-- Tampilkan Semua Ruang --</option>
+                            <option value="SEMUA">-- Semua Ruang --</option>
                         </select>
                     </div>
                 </div>
@@ -197,6 +212,81 @@
         let cacheMasterData = {};
         let namaFileUnduhan = "Dokumen_CBT";
 
+        // FUNGSI BARU: MENAMBAH BARIS FORM INPUT MAPEL BARU SECARA MANUAL
+        function tambahBarisMapelForm() {
+            const container = document.getElementById('container-multi-mapel');
+            const newRow = document.createElement('div');
+            newRow.className = 'mapel-row-item';
+            newRow.innerHTML = `
+                <button class="btn-remove-row" onclick="this.parentElement.remove()">Hapus</button>
+                <div class="mapel-grid-inputs">
+                    <input type="text" placeholder="ID Sesi (Contoh: M-01)" class="m-id">
+                    <input type="text" placeholder="Nama Mata Pelajaran" class="m-nama">
+                    <input type="text" placeholder="Kelas (Contoh: XII-RPL)" class="m-kelas">
+                    <input type="text" placeholder="Ruang (Contoh: Lab 2)" class="m-ruang">
+                    <input type="text" placeholder="Jam Mulai (07:30)" class="m-mulai">
+                    <input type="text" placeholder="Jam Selesai (09:30)" class="m-selesai">
+                    <input type="text" placeholder="Token Akses Sesi" class="m-token">
+                    <input type="text" placeholder="URL Google Form Soal" class="m-link">
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+
+        // FUNGSI BARU: MENGUMPULKAN SELURUH DATA MULTI-MAPEL DAN KIRIM KE CLOUD GOOGLE SCRIPT
+        function simpanMultiJadwalManual() {
+            const rows = document.querySelectorAll('.mapel-row-item');
+            let dataJadwalMassal = [];
+            
+            rows.forEach(row => {
+                const id = row.querySelector('.m-id').value.trim();
+                const mapel = row.querySelector('.m-nama').value.trim();
+                const kelas = row.querySelector('.m-kelas').value.trim();
+                const ruang = row.querySelector('.m-ruang').value.trim();
+                const mulai = row.querySelector('.m-mulai').value.trim();
+                const selesai = row.querySelector('.m-selesai').value.trim();
+                const token = row.querySelector('.m-token').value.trim();
+                const link = row.querySelector('.m-link').value.trim();
+                
+                if (id && mapel && link) {
+                    dataJadwalMassal.push({
+                        id: id, mapel: mapel, kelas: kelas || "Umum", ruang: ruang || "Ruang Global",
+                        mulai: mulai || "07:30", selesai: selesai || "09:00", link: link, token: token || "TOKEN1"
+                    });
+                }
+            });
+
+            if(dataJadwalMassal.length === 0) {
+                return alert("Gagal Simpan! Harap isi minimal data ID Sesi, Nama Mapel, dan Link Google Form.");
+            }
+
+            if(confirm(`Kirim & Amankan ${dataJadwalMassal.length} Data Pengaturan Jadwal Mapel Baru Ke Server?`)) {
+                fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "addUjianMassal", dataUjian: dataJadwalMassal })
+                })
+                .then(res => res.json())
+                .then(resData => {
+                    alert(resData.msg || "Pengaturan Banyak Mapel Berhasil Ditambahkan!");
+                    // Reset Form ke keadaan awal (1 form kosong)
+                    document.getElementById('container-multi-mapel').innerHTML = `
+                        <div class="mapel-row-item">
+                            <div class="mapel-grid-inputs">
+                                <input type="text" placeholder="ID Sesi (Contoh: M-01)" class="m-id">
+                                <input type="text" placeholder="Nama Mata Pelajaran" class="m-nama">
+                                <input type="text" placeholder="Kelas (Contoh: XII-RPL)" class="m-kelas">
+                                <input type="text" placeholder="Ruang (Contoh: Lab 2)" class="m-ruang">
+                                <input type="text" placeholder="Jam Mulai (07:30)" class="m-mulai">
+                                <input type="text" placeholder="Jam Selesai (09:30)" class="m-selesai">
+                                <input type="text" placeholder="Token Akses Sesi" class="m-token">
+                                <input type="text" placeholder="URL Google Form Soal" class="m-link">
+                            </div>
+                        </div>`;
+                    muatDataControlRoom();
+                }).catch(err => alert("Terjadi kesalahan pengiriman: " + err.message));
+            }
+        }
+
         function toggleFasilitasAkses(val) {
             document.getElementById('token-label').innerText = val === 'admin' ? 'Password Admin' : 'Token Jalur Sesi Ujian';
             if(val === 'admin') document.getElementById('box-fasilitas').classList.add('hidden');
@@ -222,17 +312,11 @@
             .then(data => {
                 btnLogin.innerText = "LOGIN"; btnLogin.disabled = false;
 
-                // --- SISTEM VALIDASI RESPONS SERVER BARU ---
                 if (data.status === "GAGAL") return alert("Nomor Peserta atau Kredensial Salah!");
                 if (data.status === "SALAH_TOKEN") return alert("Token Sesi Ujian Tidak Valid / Salah!");
                 if (data.status === "DIBLOKIR") return alert("Akun Anda Ditangguhkan oleh Proktor!");
                 if (data.status === "BELUM_MULAI") return alert(`Ujian belum dibuka. Jam masuk Sesi: ${data.info}`);
-                
-                // Blokir Login Jika Waktu Selesai
-                if (data.status === "SUDAH_SELESAI") {
-                    return alert("Maaf, login ditolak. Waktu untuk token sesi ujian ini telah habis!");
-                }
-                
+                if (data.status === "SUDAH_SELESAI") return alert("Maaf, login ditolak. Waktu untuk token sesi ujian ini telah habis!");
                 if (data.status === "TERLAMBAT_HANGUS") return alert(`Batas toleransi terlambat habis (Anda telat ${data.info} menit).`);
 
                 if (data.status === "SUKSES_ADMIN") {
@@ -324,7 +408,7 @@
             let ruangSet = new Set();
             listSiswa.forEach(s => { if(s.ruang) ruangSet.add(s.ruang.trim()); });
             
-            let htmlOptions = '<option value="SEMUA">-- Tampilkan Semua Ruang --</option>';
+            let htmlOptions = '<option value="SEMUA">-- Semua Ruang --</option>';
             ruangSet.forEach(ruang => {
                 htmlOptions += `<option value="${ruang}">${ruang}</option>`;
             });
@@ -374,9 +458,7 @@
             if(!cacheMasterData.siswa) return alert("Data siswa belum siap!");
             namaFileUnduhan = "Kartu_Peserta_Massal";
             const nSekolah = document.getElementById('cfg-sekolah').value.toUpperCase();
-            const subTitle = document.getElementById('cfg-sub').value.toUpperCase();
-            const footText = document.getElementById('cfg-footer').value;
-
+            
             document.getElementById('view-admin').classList.add('hidden');
             document.getElementById('div-render-pdf').classList.remove('hidden');
 
@@ -389,13 +471,11 @@
                 }
                 sheetsHtml += `
                 <div class="kartu-box">
-                    <div class="kartu-header"><b>${nSekolah}</b><br><span style="font-size:9px; font-weight:normal;">${subTitle}</span></div>
+                    <div class="kartu-header"><b>${nSekolah}</b><br><span style="font-size:9px; font-weight:normal;">ASESMEN DIGITAL</span></div>
                     <div class="kartu-row"><div class="kartu-label">No. Peserta</div><div>: <b>${s.no}</b></div></div>
                     <div class="kartu-row"><div class="kartu-label">Nama Siswa</div><div>: ${s.nama}</div></div>
-                    <div class="kartu-row"><div class="kartu-label">Kelas Grup</div><div>: ${s.kelas || 'Umum'}</div></div>
                     <div class="kartu-row"><div class="kartu-label">Sektor Sesi</div><div>: ${s.ujian}</div></div>
                     <div class="kartu-row"><div class="kartu-label">PIN Keamanan</div><div>: ******* (Default)</div></div>
-                    <div style="margin-top:10px; font-size:8px; color:#475569; font-style:italic;">${footText}</div>
                 </div>`;
                 counter++;
             });
