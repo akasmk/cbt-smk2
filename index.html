@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Intelligent System V3 - Full PDF Suite</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root { --primary: #0f172a; --secondary: #2563eb; --accent: #f59e0b; --danger: #ef4444; --success: #22c55e; }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; height: 100%; user-select: none; }
+        .hidden { display: none !important; }
+        .login-card { max-width: 400px; margin: 50px auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #475569; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        .radio-box { display: flex; gap: 15px; margin-top: 5px; background: #f1f5f9; padding: 10px; border-radius: 6px; }
+        .radio-item { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #334155; }
+        header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .anbk-wrapper { display: flex; height: calc(100vh - 56px); }
+        .soal-frame-area { flex: 3.5; background: #fff; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .sidebar { flex: 1; background: #f1f5f9; padding: 20px; box-sizing: border-box; border-left: 1px solid #e2e8f0; }
+        .admin-main { padding: 25px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; max-width: 1600px; margin: 0 auto; }
+        .admin-col { background: white; padding: 22px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); height: fit-content; border: 1px solid #e2e8f0; }
+        .btn { padding: 11px 16px; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: white; display: inline-block; margin-right: 5px; text-decoration: none; text-align: center; }
+        .btn-block { width: 100%; margin-top: 5px; margin-bottom: 5px; box-sizing: border-box; }
+        .btn-primary { background: var(--secondary); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-accent { background: var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+        table, th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; }
+        #lock-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); color:white; z-index:99999; text-align:center; padding-top:15%; }
+        .tag { padding: 3px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; color: white; display: inline-block; }
+        .tag-room { background: #0ea5e9; }
+        
+        /* PREVIEW LAYOUT ENGINE UNTUK PDF A4 */
+        .pdf-preview-container { background: #525659; padding: 30px 15px; min-height: 100vh; }
+        .pdf-page-sheet { background: white; width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto 15mm auto; box-shadow: 0 0 15px rgba(0,0,0,0.3); box-sizing: border-box; color: #000; }
+        
+        /* GAYA BERITA ACARA */
+        .ba-title { text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 25px; line-height: 1.4; border-bottom: 3px double #000; padding-bottom: 10px; }
+        .ba-meta-table { width: 100%; margin-bottom: 20px; font-size: 13px; }
+        .ba-meta-table td { border: none; padding: 4px 0; }
+        .ba-siswa-table { width: 100%; margin-top: 15px; font-size: 12px; }
+        .ba-siswa-table th, .ba-siswa-table td { border: 1px solid #000; padding: 7px; text-align: left; }
+        .ba-siswa-table th { background: #f2f2f2 !important; color: #000; }
+        .ba-ttd-space { margin-top: 40px; display: table; width: 100%; }
+        .ba-ttd-cell { display: table-cell; width: 50%; text-align: center; font-size: 13px; }
+
+        /* GAYA KARTU PESERTA CUSTOM */
+        .grid-kartu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .kartu-box { border: 2px solid #000; padding: 15px; border-radius: 8px; background: #fff; position: relative; box-sizing: border-box; page-break-inside: avoid; }
+        .kartu-header { border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 12px; line-height: 1.3; }
+        .kartu-row { display: flex; font-size: 11px; margin-bottom: 5px; }
+        .kartu-label { width: 90px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div id="view-login" class="login-card no-print">
+        <h2 style="color: var(--primary); margin-top:0; text-align:center; font-weight: 800;">CBT SMK BHAKTI PRAJA 2 BATANG</h2>
+        <div class="form-group">
+            <label>Otoritas Akses</label>
+            <select id="role" onchange="toggleFasilitasAkses(this.value)">
+                <option value="siswa">Peserta Ujian (Siswa)</option>
+                <option value="admin">Proktor / Pengawas</option>
+            </select>
+        </div>
+        <div class="form-group" id="box-fasilitas">
+            <label>Fasilitas Ujian Perangkat</label>
+            <div class="radio-box">
+                <div class="radio-item"><input type="radio" name="hp_opt" value="YA" checked> Gunakan HP Pribadi</div>
+                <div class="radio-item"><input type="radio" name="hp_opt" value="TIDAK"> Pakai Komputer Lab</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>No Peserta / Username Admin</label>
+            <input type="text" id="username" placeholder="Masukkan Nomor/ID">
+        </div>
+        <div class="form-group">
+            <label id="token-label">Token Jalur Sesi Ujian</label>
+            <input type="password" id="passOrToken" placeholder="Masukkan Sandi Keamanan">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="prosesLoginSistem()">LOGIN</button>
+    </div>
+
+    <div id="view-siswa" class="hidden no-print">
+        <header>
+            <div>[SEKTOR: <span id="s-ruang" style="color: var(--accent);">--</span>] MAPEL: <span id="s-mapel">--</span></div>
+            <div style="color: var(--danger); font-weight: 800;" id="p-count">Pelanggaran Layar: 0/3</div>
+        </header>
+        <div class="anbk-wrapper">
+            <div class="soal-frame-area">
+                <iframe id="gform-iframe" src="">Memuat Lembar Ujian Virtual...</iframe>
+            </div>
+            <div class="sidebar">
+                <h3 style="margin-top:0;">Siswa: <span id="s-nama" style="color: var(--secondary);">--</span></h3>
+                <div id="notif-menit-telat" class="hidden" style="background:#fff3cd; border:1px solid #ffeba2; color:#856404; padding:10px; border-radius:6px; font-size:12px; font-weight:bold; margin-bottom:15px;">
+                    ⚠️ Anda terlambat <span id="menit-terbuang">0</span> menit. Durasi pengerjaan berkurang otomatis.
+                </div>
+                <button class="btn btn-danger btn-block" onclick="window.location.reload()">KELUAR SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-admin" class="hidden no-print">
+        <header style="background: #0f172a;">
+            <div>CONTROL PANEL PROKTOR - PDF EXPORTER SUITE</div>
+            <button class="btn btn-danger" onclick="window.location.reload()">LOGOUT</button>
+        </header>
+        
+        <div class="admin-main">
+            <div class="admin-col">
+                <h3 style="margin-top:0; color: var(--primary);">⚙️ Kustomisasi Kartu Peserta</h3>
+                <div class="form-group">
+                    <label>Nama Instansi / Sekolah</label>
+                    <input type="text" id="cfg-sekolah" value="SMK BHAKTI PRAJA 2 BATANG">
+                </div>
+                <div class="form-group">
+                    <label>Sub-Header Kartu</label>
+                    <input type="text" id="cfg-sub" value="ASESMEN BERBASIS KOMPUTER & HP">
+                </div>
+                <div class="form-group">
+                    <label>Catatan Kaki Kartu (Kecil)</label>
+                    <input type="text" id="cfg-footer" value="*Harap simpan kartu ini jangan sampai hilang.">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="generatePdfKartuMassal()">🖨️ CETAK KARTU MASSAL (PDF)</button>
+                
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+                
+                <h3 style="color: var(--primary);">📄 Dokumen Berita Acara (BA)</h3>
+                <div class="form-group">
+                    <label>Nama Pengawas / Proktor</label>
+                    <input type="text" id="cfg-proktor" value="Budi Setiadi, S.Kom.">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="btn btn-success btn-block" onclick="generateBeritaAcara('sederhana')">BA Sederhana (PDF)</button>
+                    <button class="btn btn-accent btn-block" onclick="generateBeritaAcara('lengkap')">BA Lengkap (PDF)</button>
+                </div>
+                
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+                <h3 style="color: var(--primary);">+ Tambah Sesi Ujian</h3>
+                <div class="form-group"><label>ID Ujian</label><input type="text" id="u-id" placeholder="SESI-BI-XI"></div>
+                <div class="form-group"><label>Mata Pelajaran</label><input type="text" id="u-mapel"></div>
+                <div class="form-group"><label>Kelas</label><input type="text" id="u-kelas"></div>
+                <div class="form-group"><label>Ruang Asal</label><input type="text" id="u-ruang" placeholder="Ruang 01"></div>
+                <div style="display:flex; gap:10px;" class="form-group">
+                    <input type="text" id="u-mulai" placeholder="07:30">
+                    <input type="text" id="u-selesai" placeholder="09:30">
+                </div>
+                <div class="form-group"><label>Link Form</label><input type="text" id="u-link"></div>
+                <div class="form-group"><label>Token</label><input type="text" id="u-token" style="text-transform: uppercase;"></div>
+                <button class="btn btn-primary btn-block" onclick="simpanJadwalBaru()">PUBLIKASIKAN SESI</button>
+            </div>
+
+            <div class="admin-col">
+                <h3 style="margin-top:0; color: var(--primary);">Live Tracking Log Aktivitas Peserta</h3>
+                <table>
+                    <thead>
+                        <th>No Peserta</th><th>Nama Siswa</th><th>Lokasi Real-Time</th><th>Kondisi Sesi</th><th>Pelanggaran</th><th>Aksi</th>
+                    </thead>
+                    <tbody id="siswa-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-render-pdf" class="hidden pdf-preview-container">
+        <div class="no-print" style="max-width:210mm; margin:0 auto 15px auto; display:flex; justify-content:space-between; background:#fff; padding:12px; border-radius:8px;">
+            <div style="font-weight:bold; padding-top:6px; color:#1e293b;">📄 Pratinjau Dokumen Siap Cetak</div>
+            <div>
+                <button class="btn btn-success" onclick="eksporPdfDirect()">💾 DOWNLOAD FILE PDF</button>
+                <button class="btn btn-danger" onclick="tutupPreviewPdf()">❌ KEMBALI KE PANEL</button>
+            </div>
+        </div>
+        <div id="pdf-content-wrapper">
+            </div>
+    </div>
+
+    <div id="lock-screen" class="hidden no-print">
+        <h1 style="font-size: 40px; color: var(--danger); font-weight: 900;">AKSES LAYAR DIKUNCI PROKTOR</h1>
+        <p>Anda terdeteksi berpindah tab browser ujian sebanyak 3 kali berturut-turut.</p>
+        <p>Silakan hubungi proktor di depan meja pengawas untuk membuka kembali akses ujian Anda.</p>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycby7aQiIRJnB6goI-DvAwBJt2F6Gf1JLFk9Ylye691EhdkNVHWKOP16KZuqA7ChfhBbW/exec"; // GANTI DENGAN URL WEB APP ANDA
+        let userSiswaAktif = "";
+        let pilihanHpAktif = "YA";
+        let jumlahPelanggaran = 0;
+        let cacheMasterData = {};
+        let namaFileUnduhan = "Dokumen_CBT";
+
+        function toggleFasilitasAkses(val) {
+            document.getElementById('token-label').innerText = val === 'admin' ? 'Password Admin' : 'Token Jalur Sesi Ujian';
+            if(val === 'admin') document.getElementById('box-fasilitas').classList.add('hidden');
+            else document.getElementById('box-fasilitas').classList.remove('hidden');
+        }
+
+        function prosesLoginSistem() {
+            const role = document.getElementById('role').value;
+            const user = document.getElementById('username').value.trim();
+            const passOrToken = document.getElementById('passOrToken').value.trim();
+            
+            const hpOpts = document.getElementsByName('hp_opt');
+            for(let i=0; i<hpOpts.length; i++) { if(hpOpts[i].checked) { pilihanHpAktif = hpOpts[i].value; break; } }
+
+            fetch(`${API_URL}?action=loginSistem&role=${role}&username=${user}&passOrToken=${passOrToken}&punyaHp=${pilihanHpAktif}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "GAGAL") return alert("ID Akses atau Kredensial Salah!");
+                if (data.status === "SALAH_TOKEN") return alert("Token Sesi Tidak Valid!");
+                if (data.status === "DIBLOKIR") return alert("Akun Anda Ditangguhkan!");
+                if (data.status === "BELUM_MULAI") return alert(`Sesi belum aktif. Sesi dibuka: ${data.info}`);
+                if (data.status === "SUDAH_SELESAI") return alert("Sesi pengerjaan mapel ini telah kedaluwarsa!");
+                if (data.status === "TERLAMBAT_HANGUS") return alert(`Ditolak! Anda terlambat ${data.info} menit.`);
+
+                if (data.status === "SUKSES_ADMIN") {
+                    document.getElementById('view-login').classList.add('hidden');
+                    document.getElementById('view-admin').classList.remove('hidden');
+                    muatDataControlRoom();
+                    setInterval(muatDataControlRoom, 5000); 
+                } 
+                else if (data.status === "SUKSES_SISWA") {
+                    userSiswaAktif = user;
+                    if(data.telatMenit > 0) {
+                        document.getElementById('notif-menit-telat').classList.remove('hidden');
+                        document.getElementById('menit-terbuang').innerText = data.telatMenit;
+                    }
+                    
+                    fetch(`${API_URL}?action=getSetupSiswa&username=${user}&punyaHp=${pilihanHpAktif}`)
+                    .then(res => res.json())
+                    .then(setup => {
+                        document.getElementById('s-nama').innerText = data.nama;
+                        document.getElementById('s-mapel').innerText = setup.mapel;
+                        document.getElementById('s-ruang').innerText = data.ruangMengerjakan; 
+                        document.getElementById('gform-iframe').src = setup.link;
+                        
+                        document.getElementById('view-login').classList.add('hidden');
+                        document.getElementById('view-siswa').classList.remove('hidden');
+                        aktifkanAntiCheating();
+                    });
+                }
+            });
+        }
+
+        function aktifkanAntiCheating() {
+            document.documentElement.requestFullscreen().catch(() => {});
+            window.onblur = function() {
+                jumlahPelanggaran++;
+                document.getElementById('p-count').innerText = `Pelanggaran Layar: ${jumlahPelanggaran}/3`;
+                fetch(`${API_URL}?action=updatePelanggaran&username=${userSiswaAktif}&jumlah=${jumlahPelanggaran}`);
+                if (jumlahPelanggaran >= 3) {
+                    document.getElementById('lock-screen').classList.remove('hidden');
+                    if(document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                } else {
+                    alert(`PERINGATAN LAYAR!\nSisa toleransi perpindahan aplikasi Anda: ${3 - jumlahPelanggaran} kali.`);
+                }
+            };
+        }
+
+        function muatDataControlRoom() {
+            fetch(API_URL + "?action=getMasterData")
+            .then(res => res.json())
+            .then(data => {
+                cacheMasterData = data;
+                let htmlSiswa = "";
+                data.siswa.forEach(s => {
+                    let stColor = s.status === "DIBLOKIR" ? "#ef4444" : "#22c55e";
+                    let actionBtn = s.status === "DIBLOKIR" ? `<button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="eksekusiBukaBlokir('${s.no}')">Buka</button>` : `<span style="color:#94a3b8">Aktif</span>`;
+                    
+                    htmlSiswa += `<tr>
+                        <td><b>${s.no}</b></td>
+                        <td>${s.nama}</td>
+                        <td><span class="tag tag-room">${s.ruang}</span></td>
+                        <td style="color:${stColor}; font-weight:bold;">${s.status}</td>
+                        <td style="color:var(--danger); font-weight:bold;">${s.salah} / 3</td>
+                        <td>${actionBtn}</td>
+                    </tr>`;
+                });
+                document.getElementById('siswa-table-body').innerHTML = htmlSiswa;
+            });
+        }
+
+        // ================== LOGIKA GENERATE KARTU MASSAL CUSTOM PDF ==================
+        function generatePdfKartuMassal() {
+            if(!cacheMasterData.siswa) return alert("Data antrean siswa belum termuat sempurna!");
+            namaFileUnduhan = "Kartu_Peserta_Massal_CBT";
+            
+            const nSekolah = document.getElementById('cfg-sekolah').value.toUpperCase();
+            const subTitle = document.getElementById('cfg-sub').value.toUpperCase();
+            const footText = document.getElementById('cfg-footer').value;
+
+            document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('div-render-pdf').classList.remove('hidden');
+
+            let sheetsHtml = '<div class="pdf-page-sheet"><div class="grid-kartu">';
+            let counter = 0;
+
+            cacheMasterData.siswa.forEach((s, idx) => {
+                // Batasi isi kartu maksimal 8 item per halaman A4 agar presisi tidak luber
+                if (counter > 0 && counter % 8 === 0) {
+                    sheetsHtml += '</div></div><div class="pdf-page-sheet"><div class="grid-kartu">';
+                }
+                sheetsHtml += `
+                <div class="kartu-box">
+                    <div class="kartu-header"><b>${nSekolah}</b><br><span style="font-size:9px; font-weight:normal;">${subTitle}</span></div>
+                    <div class="kartu-row"><div class="kartu-label">No. Peserta</div><div>: <b>${s.no}</b></div></div>
+                    <div class="kartu-row"><div class="kartu-label">Nama Siswa</div><div>: ${s.nama}</div></div>
+                    <div class="kartu-row"><div class="kartu-label">Kelas Grup</div><div>: ${s.kelas || 'Umum'}</div></div>
+                    <div class="kartu-row"><div class="kartu-label">Sektor Sesi</div><div>: ${s.ujian}</div></div>
+                    <div class="kartu-row"><div class="kartu-label">PIN Keamanan</div><div>: ******* (Default)</div></div>
+                    <div style="margin-top:10px; font-size:8px; color:#475569; font-style:italic;">${footText}</div>
+                </div>`;
+                counter++;
+            });
+
+            sheetsHtml += '</div></div>';
+            document.getElementById('pdf-content-wrapper').innerHTML = sheetsHtml;
+        }
+
+        // ================== LOGIKA GENERATE BERITA ACARA PDF (SEDERHANA & LENGKAP) ==================
+        function generateBeritaAcara(tipe) {
+            if(!cacheMasterData.siswa) return alert("Log realisasi siswa belum siap!");
+            namaFileUnduhan = `Berita_Acara_${tipe.toUpperCase()}_CBT`;
+            
+            const proktorName = document.getElementById('cfg-proktor').value;
+            const tgl = new Date();
+            const strTgl = tgl.getDate() + "/" + (tgl.getMonth()+1) + "/" + tgl.getFullYear();
+
+            document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('div-render-pdf').classList.remove('hidden');
+
+            let tableRows = "";
+            cacheMasterData.siswa.forEach((s, idx) => {
+                if (tipe === 'sederhana') {
+                    tableRows += `<tr>
+                        <td style="text-align:center;">${idx+1}</td>
+                        <td><b>${s.no}</b></td>
+                        <td>${s.nama}</td>
+                        <td>${s.ruang}</td>
+                        <td style="color: green; font-weight:bold;">Hadir</td>
+                    </tr>`;
+                } else {
+                    let ket = s.salah >= 3 ? "TERKUNCI BLOKIR" : "NORMAL / AMAN";
+                    tableRows += `<tr>
+                        <td style="text-align:center;">${idx+1}</td>
+                        <td><b>${s.no}</b></td>
+                        <td>${s.nama}</td>
+                        <td>${s.ruang}</td>
+                        <td>${s.status}</td>
+                        <td style="text-align:center; color:red; font-weight:bold;">${s.salah} Kali Out</td>
+                        <td>${ket}</td>
+                    </tr>`;
+                }
+            });
+
+            let thHeader = tipe === 'sederhana' ? 
+                `<th>No</th><th>No Peserta</th><th>Nama Lengkap</th><th>Sektor Aktual</th><th>Kehadiran</th>` :
+                `<th>No</th><th>No Peserta</th><th>Nama Lengkap</th><th>Sektor Aktual</th><th>Status Akun</th><th>Log Out Tab</th><th>Keterangan Sistem</th>`;
+
+            let catatanIntegritas = tipe === 'lengkap' ? `
+                <p style="font-size:12px; line-height:1.4;"><b>CATATAN INTEGRITAS MEKANISME SYSTEM LOCK:</b><br>
+                Sistem melakukan pengawasan background window secara real-time. Peserta dengan status 'TERKUNCI BLOKIR' wajib melakukan klarifikasi fisik kepada Pengawas demi memulihkan hak pengerjaan token sesi.</p>
+            ` : '';
+
+            let templateBa = `
+            <div class="pdf-page-sheet">
+                <div class="ba-title">
+                    BERITA ACARA PELAKSANAAN UJIAN CBT DIGITAL<br>
+                    <span style="font-size:12px; font-weight:normal; text-transform:none;">Kategori Laporan: Rekapitulasi Dokumen ${tipe.toUpperCase()}</span>
+                </div>
+                <table class="ba-meta-table">
+                    <tr><td style="width:180px;">Hari / Tanggal Berjalan</td><td>: ${strTgl}</td></tr>
+                    <tr><td>Sinkronisasi Waktu</td><td>: Server WIB Jakarta (Locked GMT+7)</td></tr>
+                    <tr><td>Waktu Unduh Dokumen</td><td>: ${tgl.getHours()}:${tgl.getMinutes()} WIB</td></tr>
+                    <tr><td>Penanggung Jawab Proktor</td><td>: ${proktorName}</td></tr>
+                </table>
+                
+                <p style="font-size:13px;">Telah dilaksanakan evaluasi berbasis digital menggunakan Gatekeeper anti-cheat system. Berikut merupakan riwayat kehadiran aktual peserta di dalam server:</p>
+                
+                <table class="ba-siswa-table">
+                    <thead><tr>${thHeader}</tr></thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+                
+                <br>
+                ${catatanIntegritas}
+                
+                <div class="ba-ttd-space">
+                    <div class="ba-ttd-cell">Mengetahui,<br>Pengawas Ruangan<br><br><br><br>( ____________________ )</div>
+                    <div class="ba-ttd-cell">Dibuat di: Sektor Pusat<br>Proktor Utama / IT Admin<br><br><br><br><b>( ${proktorName} )</b></div>
+                </div>
+            </div>`;
+
+            document.getElementById('pdf-content-wrapper').innerHTML = templateBa;
+        }
+
+        // ENGINE DOWNLOAD LANGSUNG MENJADI FILE PDF
+        function eksporPdfDirect() {
+            const element = document.getElementById('pdf-content-wrapper');
+            const opt = {
+                margin:       0,
+                filename:     `${namaFileUnduhan}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function tutupPreviewPdf() {
+            document.getElementById('div-render-pdf').classList.add('hidden');
+            document.getElementById('view-admin').classList.remove('hidden');
+        }
+
+        function simpanJadwalBaru() {
+            const id = encodeURIComponent(document.getElementById('u-id').value);
+            const mp = encodeURIComponent(document.getElementById('u-mapel').value);
+            const kl = encodeURIComponent(document.getElementById('u-kelas').value);
+            const rg = encodeURIComponent(document.getElementById('u-ruang').value);
+            const ml = encodeURIComponent(document.getElementById('u-mulai').value);
+            const sl = encodeURIComponent(document.getElementById('u-selesai').value);
+            const lk = encodeURIComponent(document.getElementById('u-link').value);
+            const tk = encodeURIComponent(document.getElementById('u-token').value.toUpperCase());
+
+            fetch(`${API_URL}?action=addUjian&id=${id}&mapel=${mp}&kelas=${kl}&ruang=${rg}&mulai=${ml}&selesai=${sl}&link=${lk}&token=${tk}`)
+            .then(() => { alert("Sesi Ujian Berhasil Didaftarkan!"); muatDataControlRoom(); });
+        }
+
+        function eksekusiBukaBlokir(noPeserta) {
+            fetch(`${API_URL}?action=bukaBlokir&username=${noPeserta}`)
+            .then(() => { alert(`Kunci Layar Siswa ${noPeserta} Dibuka!`); muatDataControlRoom(); });
+        }
+    </script>
+</body>
+</html>
